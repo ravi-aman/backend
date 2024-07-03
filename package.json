@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "my 1st backend project ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "backend"
+  },
+  "keywords": [
+    "javascript",
+    "backend",
+    "project",
+    "ravikant"
+  ],
+  "author": "Ravikant Tiwari",
+  "license": "ISC"
+}
