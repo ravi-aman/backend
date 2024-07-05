@@ -20,10 +20,10 @@ const registerUser = asyncHandler(async (req, res) => {
     // Step 1: Get user details from request body
     const { fullName, email, username, password } = req.body;
 
-    console.log("email : ", email);
+    // console.log("User details received: ", { fullName, email, username, password });
 
     // Step 2: Validate required fields
-    if ([fullName, email, username, password].some((field) => field?.trim() === "")) {
+    if ([fullName, email, username, password].some((field) => !field || field.trim() === "")) {
         throw new ApiError(400, "All fields are required");
     }
 
@@ -37,8 +37,11 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     // Step 4: Check for avatar file
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverLocalPath = req.files?.coverImage[0]?.path;
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
+    const coverLocalPath = req.files?.coverImage?.[0]?.path;
+
+    // console.log("Avatar local path: ", avatarLocalPath);
+    // console.log("Cover image local path: ", coverLocalPath);
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required");
@@ -46,7 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Step 5: Upload avatar and cover image to Cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    const coverImage = await uploadOnCloudinary(coverLocalPath);
+    const coverImage = coverLocalPath ? await uploadOnCloudinary(coverLocalPath) : null;
 
     if (!avatar) {
         throw new ApiError(400, "Failed to upload avatar file");
@@ -59,7 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
         coverImage: coverImage?.url || "",
         email,
         password,
-        username: username.toLowerCase()
+        username:username.toLowerCase()
     });
 
     // Step 7: Remove password and refresh token fields
@@ -75,6 +78,7 @@ const registerUser = asyncHandler(async (req, res) => {
         new ApiResponse(200, createdUser, "User created successfully")
     );
 });
+
 
 // Export the registerUser controller for use in other modules
 export { registerUser };

@@ -6,27 +6,7 @@ import {upload}from"../middlewares/multer.middleware.js"
 const router = Router();
 
 // Define a POST route for user registration
-router.route("/register").post(
-    upload.fields([
-        {
-           name:"avtar",
-           maxCount:1 
-        },
-        {
-            name:"coverImage",
-            maxCount:1
-        }
-    ]),
-    registerUser
-);
-
-
-
-
-
-
-
-
+router.post('/register', upload, registerUser);
 
 
 // Export the router for use in other modules

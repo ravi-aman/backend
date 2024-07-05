@@ -16,8 +16,11 @@ const storage = multer.diskStorage({
     }
 });
 
-// Create the multer upload middleware with the configured storage settings
-const upload = multer({ storage });
 
+// Create the multer upload middleware with the configured storage settings
+const upload = multer({ storage }).fields([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'coverImage', maxCount: 1 }
+]);
 // Export the upload middleware for use in other modules
 export { upload };

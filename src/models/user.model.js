@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema({
         type: String, // Cloudinary URL
         required: true,
     },
+    coverImage: {
+        type: String, // Cloudinary URL
+    },
     watchHistory: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Video", // Reference to the Video model
@@ -46,6 +49,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next(); // Skip if password is not modified
     this.password = await bcrypt.hash(this.password, 10); // Hash the password
+
     next();
 });
 

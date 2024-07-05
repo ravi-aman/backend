@@ -1,12 +1,15 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Configuration
-// Configure Cloudinary with our cloud name, API key, and API secret
 cloudinary.config({
-    cloud_name: CLOUDINARY_CLOUD_NAME, // Replace with our Cloudinary cloud name
-    api_key: CLOUDINARY_API_KEY,       // Replace with our Cloudinary API key
-    api_secret: CLOUDINARY_API_SECERET // Replace with our Cloudinary API secret
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
 // Function to upload a file to Cloudinary
@@ -20,19 +23,27 @@ const uploadOnCloudinary = async (localfilePath) => {
             resource_type: "auto" // Automatically detect the resource type (image, video, etc.)
         });
 
-        // Log the successful upload and the file URL
-        console.log("FILE HAS BEEN UPLOADED SUCCESSFULLY ON CLOUDINARY !! ", response.url);
-        
+        // Remove the locally saved temporary file
+        fs.unlink(localfilePath, (err) => {
+            if (err) {
+                console.error("Failed to delete local file:", err);
+            }
+        });
+
         // Return the response object containing details of the uploaded file
         return response;
     } catch (error) {
         // If upload fails, remove the locally saved temporary file
-        fs.unlink(localfilePath);
-        
+        fs.unlink(localfilePath, (err) => {
+            if (err) {
+                console.error("Failed to delete local file:", err);
+            }
+        });
+
         // Return null indicating failure
         return null;
     }
 }
 
 // Export the uploadOnCloudinary function for use in other modules
-export { uploadOnCloudinary }
+export { uploadOnCloudinary };
