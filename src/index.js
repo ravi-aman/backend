@@ -4,7 +4,7 @@ import { app } from "./app.js"; // Import the app instance from your app file
 
 // Load environment variables from .env file
 dotenv.config({
-    path: './env'
+    path: './.env'
 });
 
 // Connect to MongoDB
