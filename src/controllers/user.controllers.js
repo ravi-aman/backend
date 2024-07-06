@@ -9,7 +9,7 @@ import { ApiResponse } from "../utils/ApiResponse.js"; // Import the ApiResponse
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
         const user = await User.findById(userId)
-        const accessToken = user.refreshRefreshToken()
+        const accessToken = user.generateRefreshToken()
         const refreshToken = user.generateAccessToken()
 
         user.refreshToken = refreshToken
@@ -20,6 +20,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
         throw new ApiError(500, "Something went wrong while generating refresh and assess token")
     }
 }
+
 // Define the registerUser controller function
 const registerUser = asyncHandler(async (req, res) => {
     //steps
@@ -95,7 +96,6 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
-
 const loginUser = asyncHandler(async (req, res) => {
 
     // steps
@@ -150,21 +150,45 @@ const loginUser = asyncHandler(async (req, res) => {
             )
         )
 
+        
+
 
 })
-
-
 
 const logoutUser =asyncHandler(async(req,res)=>{
     // steps
     //1. 
 
-    
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                refreshToken:undefined
+            }
+        },
+        {
+            new:true
+        }
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true,
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
+    .json(new ApiError(200,"User looged out successfully"))
+
+
 
 })
 
 // Export the registerUser controller for use in other modules
 export {
     registerUser,
-    loginUser
+    loginUser,
+    logoutUser
 };
