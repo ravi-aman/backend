@@ -6,7 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js"; // Import the ApiResponse
 
 
 
-const generateAccessAndRefreshTockens = async (userId) => {
+const generateAccessAndRefreshTokens = async (userId) => {
     try {
         const user = await User.findById(userId)
         const accessToken = user.refreshRefreshToken()
@@ -126,7 +126,7 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(401, "invalid password credential");
     }
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTockens(user._id)
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
 
     const loggesdInUser = await User.findById(user._id).select("-password -refreshToken")
 
