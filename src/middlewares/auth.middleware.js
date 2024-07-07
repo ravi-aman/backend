@@ -1,37 +1,50 @@
-import jwt from "jsonwebtoken"; // Import jsonwebtoken for JWT operations
-import { ApiError } from "../utils/ApiError.js"; // Import the ApiError utility
-import { asyncHandler } from "../utils/asyncHandler.js"; // Import the asyncHandler utility
-import { User } from "../models/user.model.js"; // Import the User model
+import jwt from "jsonwebtoken";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { User } from "../models/user.model.js";
+import dovenv from "dotenv"
 
-// Define the verifyJWT middleware function
+// Middleware to verify JWT token
 export const verifyJWT = asyncHandler(async (req, res, next) => {
     try {
-        // Step 1: Get the token from cookies or Authorization header
+        // Step 1: Retrieve token from cookies or Authorization header
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
-    
-        // Step 2: Check if the token is present
+
+        // Step 2: Check if token exists
         if (!token) {
-            throw new ApiError(401, "Unauthorized request");
+            throw new ApiError(401, "Unauthorized request: No token provided");
         }
-    
+
         // Step 3: Verify the token
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    
-        // Step 4: Get user from the token and attach it to the request object
-        const user = await User.findById(decodedToken._id);
-    
-        // Step 5: Check if the user exists
-        if (!user) {
-            throw new ApiError(401, "Unauthorized request");
+        let decodedToken;
+        try {
+            decodedToken = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+        } catch (error) {
+            // Step 4: Handle token verification errors
+            if (error instanceof jwt.JsonWebTokenError) {
+                throw new ApiError(401, "Invalid access token: Token verification failed");
+            } else if (error instanceof jwt.TokenExpiredError) {
+                throw new ApiError(401, "Access token expired");
+            } else {
+                throw new ApiError(500, "Internal server error");
+            }
         }
-    
-        // Step 6: Attach the user to the request object
+
+        // Step 5: Retrieve user from database using token payload
+        const user = await User.findById(decodedToken._id);
+
+        // Step 6: Check if user exists
+        if (!user) {
+            throw new ApiError(401, "Unauthorized request: User not found");
+        }
+
+        // Step 7: Attach user object to request for further middleware/controllers
         req.user = user;
-    
-        // Step 7: Call the next middleware
+
+        // Step 8: Proceed to next middleware/controller
         next();
     } catch (error) {
-        // Handle errors, such as invalid tokens
-        throw new ApiError(401, "Invalid access token");
+        // Step 9: Handle any errors that occur during token verification
+        throw new ApiError(401, error.message || "Unauthorized request");
     }
 });
